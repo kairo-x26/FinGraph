@@ -12,6 +12,7 @@
     "migrate": "tsx src/db/cli.ts"
   },
   "devDependencies": {
+    "@fingraph/sandbox": "workspace:*",
     "@types/pg": "^8.23.1",
     "tsup": "^9.0.0"
   },

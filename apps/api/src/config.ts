@@ -57,6 +57,9 @@ const schema = z.object({
   ANTHROPIC_API_KEY: z.string().optional(),
   ANTHROPIC_MODEL: z.string().default('claude-sonnet-5-5'),
 
+  /** Enables POST /v1/organizations for platform operators when set. */
+  PLATFORM_ADMIN_TOKEN: z.string().min(24).optional(),
+
   RATE_LIMIT_PER_MINUTE: z.coerce.number().int().default(600),
 
   GOOGLE_CLIENT_ID: z.string().optional(),

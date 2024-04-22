@@ -8,7 +8,10 @@ import type { AppContext, AuthContext } from './context';
 import type { Config } from './config';
 import type { Database } from './db';
 import { AppError } from './lib/errors';
+import { auditRoutes } from './modules/audit/routes';
 import { healthRoutes } from './modules/health/routes';
+import { adminRoutes } from './modules/identity/admin-routes';
+import { authRoutes, identityHooks } from './modules/identity/auth-routes';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -142,7 +145,12 @@ export async function buildApp({ config, db }: BuildOptions): Promise<FastifyIns
   });
   await app.register(swaggerUi, { routePrefix: '/docs' });
 
+  await identityHooks(app);
+
   await app.register(healthRoutes);
+  await app.register(authRoutes);
+  await app.register(adminRoutes);
+  await app.register(auditRoutes);
 
   return app;
 }

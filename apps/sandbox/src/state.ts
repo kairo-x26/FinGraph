@@ -14,9 +14,10 @@ export const DEFAULT_USERS: SandboxUser[] = [
   { sub: 'u-analyst', email: 'ana.analyst@acme.test', name: 'Ana Ruiz', password: 'password', mfa: true },
   { sub: 'u-analyst2', email: 'sam.analyst@acme.test', name: 'Sam Okafor', password: 'password', mfa: true },
   { sub: 'u-risk', email: 'rita.risk@acme.test', name: 'Rita Chen', password: 'password', mfa: true },
-  { sub: 'u-onboard', email: 'omar.onboarding@acme.test', name: 'Omar Haddad', password: 'password', mfa: false },
+  { sub: 'u-onboard', email: 'omar.onboarding@acme.test', name: 'Omar Haddad', password: 'password', mfa: true },
   { sub: 'u-audit', email: 'ivy.auditor@acme.test', name: 'Ivy Lindqvist', password: 'password', mfa: true },
-  { sub: 'u-dev', email: 'dev.integrations@acme.test', name: 'Dana Park', password: 'password', mfa: false },
+  { sub: 'u-dev', email: 'dev.integrations@acme.test', name: 'Dana Park', password: 'password', mfa: true },
+  { sub: 'u-nomfa', email: 'casey.contractor@acme.test', name: 'Casey Lee', password: 'password', mfa: false },
   { sub: 'u-other', email: 'olga@globex.test', name: 'Olga Petrova', password: 'password', mfa: true },
 ];
 
