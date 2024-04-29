@@ -3,7 +3,7 @@ import type { Config } from '../../config';
 import type { AuthContext } from '../../context';
 import type { Database, Tx } from '../../db';
 import { randomToken, sha256Hex } from '../../lib/crypto';
-import { settingsOf, type TenantRow } from './tenants';
+import { ipAllowed, settingsOf, type TenantRow } from './tenants';
 
 export const SESSION_COOKIE = 'fg_session';
 export const CSRF_COOKIE = 'fg_csrf';
@@ -60,7 +60,12 @@ interface SessionLookup {
  * Resolves a session token into an auth context. Enforces absolute expiry, idle
  * timeout, user and tenant status. Touches `last_seen_at` at most once a minute.
  */
-export async function resolveSession(db: Database, config: Config, token: string): Promise<AuthContext | null> {
+export async function resolveSession(
+  db: Database,
+  config: Config,
+  token: string,
+  ip?: string | null,
+): Promise<AuthContext | null> {
   if (!token || token.length > 200) return null;
   return db.system(async (tx) => {
     const s = await tx.one<SessionLookup>(
@@ -75,7 +80,10 @@ export async function resolveSession(db: Database, config: Config, token: string
     );
     if (!s) return null;
     const now = Date.now();
-    const idleMinutes = settingsOf({ settings: s.tenant_settings }).session_idle_minutes ?? config.SESSION_IDLE_MINUTES;
+    const settings = settingsOf({ settings: s.tenant_settings });
+    // Requests from outside the allowlist are treated as unauthenticated but keep the session.
+    if (!ipAllowed(settings.ip_allowlist, ip)) return null;
+    const idleMinutes = settings.session_idle_minutes ?? config.SESSION_IDLE_MINUTES;
     const idleExpired = now - new Date(s.last_seen_at).getTime() > idleMinutes * 60_000;
     if (new Date(s.expires_at).getTime() < now || idleExpired || s.user_status !== 'active' || s.tenant_status !== 'active') {
       await tx.query('update sessions set revoked_at = now() where id = $1 and revoked_at is null', [s.session_id]);

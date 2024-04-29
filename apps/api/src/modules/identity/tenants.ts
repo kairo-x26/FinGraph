@@ -1,3 +1,4 @@
+import { BlockList, isIP } from 'node:net';
 import { z } from 'zod';
 import type { Config } from '../../config';
 import type { Tx } from '../../db';
@@ -9,6 +10,8 @@ export const tenantSettingsSchema = z.object({
   session_idle_minutes: z.number().int().min(5).max(24 * 60).optional(),
   session_absolute_hours: z.number().int().min(1).max(72).optional(),
   allowed_email_domains: z.array(z.string().min(3).max(253)).max(50).default([]),
+  /** CIDR ranges allowed to use sessions; empty means unrestricted. */
+  ip_allowlist: z.array(z.string().max(64)).max(100).default([]),
   default_retention_days: z.number().int().min(30).max(36500).default(2555),
   exports_require_approval: z.boolean().default(false),
   quotas: z
@@ -37,6 +40,27 @@ export interface TenantRow {
   oidc_client_id: string | null;
   oidc_client_secret_enc: string | null;
   created_at: Date;
+}
+
+/** True when `ip` is permitted by the tenant's allowlist (or no allowlist is set). */
+export function ipAllowed(allowlist: string[], ip: string | null | undefined): boolean {
+  if (!allowlist.length) return true;
+  if (!ip) return false;
+  const addr = ip.startsWith('::ffff:') ? ip.slice(7) : ip;
+  const family = isIP(addr) === 6 ? 'ipv6' : 'ipv4';
+  const list = new BlockList();
+  for (const entry of allowlist) {
+    const [net, bits] = entry.split('/');
+    if (!net || !isIP(net)) continue;
+    const fam = isIP(net) === 6 ? 'ipv6' : 'ipv4';
+    const prefix = bits === undefined ? (fam === 'ipv6' ? 128 : 32) : Number(bits);
+    try {
+      list.addSubnet(net, prefix, fam);
+    } catch {
+      /* ignore malformed entries */
+    }
+  }
+  return list.check(addr, family);
 }
 
 export function settingsOf(t: Pick<TenantRow, 'settings'>): TenantSettings {

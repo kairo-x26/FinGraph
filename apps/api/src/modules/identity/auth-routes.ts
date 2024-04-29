@@ -12,7 +12,7 @@ import {
   revokeSession,
   SESSION_COOKIE,
 } from './sessions';
-import { oidcProviderFor, settingsOf, tenantBySlug, type TenantRow } from './tenants';
+import { ipAllowed, oidcProviderFor, settingsOf, tenantBySlug, type TenantRow } from './tenants';
 
 const UNSAFE = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 const FLOW_TTL_MS = 10 * 60_000;
@@ -28,7 +28,7 @@ export async function identityHooks(app: FastifyInstance) {
 
   app.addHook('onRequest', async (req) => {
     const token = req.cookies[SESSION_COOKIE];
-    if (token) req.auth = await resolveSession(db, config, token);
+    if (token) req.auth = await resolveSession(db, config, token, req.ip);
   });
 
   // Double-submit CSRF protection for cookie-authenticated, state-changing requests.
@@ -195,6 +195,7 @@ export async function authRoutes(app: FastifyInstance) {
         if (!user) return fail('not_provisioned');
         if (user.status !== 'active') return fail('account_deactivated', user.id);
         if (settings.require_mfa && !hasMfa(amr)) return fail('mfa_required', user.id);
+        if (!ipAllowed(settings.ip_allowlist, req.ip)) return fail('network_not_allowed', user.id);
 
         await tx.query('update users set last_login_at = now() where id = $1', [user.id]);
         const session = await createSession(tx, config, tenant, {
