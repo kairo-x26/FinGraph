@@ -71,7 +71,7 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   ],
   analyst: analystBase,
   risk_manager: [...analystBase, 'case:assign', 'case:approve', 'admin:policies', 'audit:read'],
-  onboarding: ['case:read', 'case:create', 'case:update', 'document:read', 'document:upload'],
+  onboarding: ['case:read', 'case:create', 'case:update', 'case:assign', 'document:read', 'document:upload'],
   auditor: [
     'case:read',
     'document:read',

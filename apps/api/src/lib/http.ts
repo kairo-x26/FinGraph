@@ -122,6 +122,16 @@ export function route<B = unknown, Q = unknown, P = unknown>(
     ),
     handler: async (req, reply) => {
       const auth = req.auth ?? null;
+      const isPublic = spec.auth === 'none' || spec.auth === 'optional';
+      // Authorization is checked before validation so callers learn nothing about inputs they may not send.
+      if (!isPublic) {
+        if (!auth) throw unauthenticated();
+        if (auth.kind === 'api_client') {
+          const accepted = spec.scopes ?? [];
+          if (!accepted.some((s) => auth.scopes.includes(s))) throw forbidden();
+        }
+        if (!hasPermissions(auth, required)) throw forbidden();
+      }
       const params = parse(spec.params, req.params, 'params');
       const query = parse(spec.query, req.query, 'query');
       const body = spec.rawBody ? (req.body as B) : parse(spec.body, req.body, 'body');
@@ -131,11 +141,6 @@ export function route<B = unknown, Q = unknown, P = unknown>(
         result = await spec.handler({ req, reply, body, query, params, auth });
       } else {
         if (!auth) throw unauthenticated();
-        if (auth.kind === 'api_client') {
-          const accepted = spec.scopes ?? [];
-          if (!accepted.some((s) => auth.scopes.includes(s))) throw forbidden();
-        }
-        if (!hasPermissions(auth, required)) throw forbidden();
         const tx = <T>(fn: (tx: Tx) => Promise<T>) => req.server.ctx.db.tenant(auth.tenantId, fn);
         result = await spec.handler({ req, reply, body, query, params, auth, tx });
       }

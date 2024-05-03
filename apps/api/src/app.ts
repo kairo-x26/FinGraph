@@ -9,6 +9,7 @@ import type { Config } from './config';
 import type { Database } from './db';
 import { AppError } from './lib/errors';
 import { auditRoutes } from './modules/audit/routes';
+import { caseRoutes } from './modules/cases/routes';
 import { healthRoutes } from './modules/health/routes';
 import { adminRoutes } from './modules/identity/admin-routes';
 import { authRoutes, identityHooks } from './modules/identity/auth-routes';
@@ -155,6 +156,7 @@ export async function buildApp({ config, db }: BuildOptions): Promise<FastifyIns
   await app.register(adminRoutes);
   await app.register(scimRoutes);
   await app.register(auditRoutes);
+  await app.register(caseRoutes);
 
   return app;
 }
