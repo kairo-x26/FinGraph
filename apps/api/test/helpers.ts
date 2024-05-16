@@ -176,3 +176,31 @@ export async function acmeClients(env: TestEnv) {
     developer: await by('dev.integrations@acme.test'),
   };
 }
+
+export type Client = ReturnType<typeof client>;
+
+/** Signed-URL upload + registration, like the web app does it. */
+export async function uploadDocument(
+  app: FastifyInstance,
+  c: Client,
+  caseId: string,
+  file: { filename: string; mime: string; bytes: Buffer },
+  extra: Record<string, unknown> = {},
+) {
+  const init = await c.post('/v1/documents/uploads', {
+    case_id: caseId,
+    filename: file.filename,
+    mime_type: file.mime,
+    size_bytes: file.bytes.length,
+  });
+  if (init.statusCode !== 201) return init;
+  const url = new URL(init.json().upload_url);
+  const put = await app.inject({
+    method: 'PUT',
+    url: url.pathname + url.search,
+    headers: { 'content-type': 'application/octet-stream' },
+    payload: file.bytes,
+  });
+  if (put.statusCode !== 200) return put;
+  return c.post('/v1/documents', { upload_id: init.json().upload_id, ...extra });
+}

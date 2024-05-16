@@ -4,7 +4,11 @@ import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { randomUUID } from 'node:crypto';
-import type { AppContext, AuthContext } from './context';
+import type { AppContext, AuthContext, ServiceOverrides } from './context';
+import { createContext } from './services';
+import { createWorker } from './jobs';
+import type { Worker } from './modules/jobs/worker';
+import { documentRoutes } from './modules/documents/routes';
 import type { Config } from './config';
 import type { Database } from './db';
 import { AppError } from './lib/errors';
@@ -19,6 +23,7 @@ import { registerRateLimit } from './lib/rate-limit';
 declare module 'fastify' {
   interface FastifyInstance {
     ctx: AppContext;
+    worker: Worker;
   }
   interface FastifyRequest {
     auth: AuthContext | null;
@@ -35,9 +40,10 @@ const CORRELATION_RE = /^[A-Za-z0-9._-]{8,128}$/;
 export interface BuildOptions {
   config: Config;
   db: Database;
+  services?: ServiceOverrides;
 }
 
-export async function buildApp({ config, db }: BuildOptions): Promise<FastifyInstance> {
+export async function buildApp({ config, db, services }: BuildOptions): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
       level: config.LOG_LEVEL,
@@ -65,8 +71,15 @@ export async function buildApp({ config, db }: BuildOptions): Promise<FastifyIns
   app.setValidatorCompiler(() => (data) => ({ value: data }));
   app.setSerializerCompiler(() => (data) => JSON.stringify(data));
 
-  const ctx: AppContext = { config, db, log: app.log };
+  const ctx: AppContext = createContext(config, db, app.log, services);
   app.decorate('ctx', ctx);
+  // The worker is always constructed (tests drain it); it only polls when WORKER_INLINE is set.
+  const worker = createWorker(ctx);
+  app.decorate('worker', worker);
+  if (config.WORKER_INLINE) {
+    app.addHook('onReady', async () => worker.start());
+  }
+  app.addHook('onClose', async () => worker.stop());
   app.decorateRequest('auth', null);
 
   app.addHook('onRequest', async (req, reply) => {
@@ -157,6 +170,7 @@ export async function buildApp({ config, db }: BuildOptions): Promise<FastifyIns
   await app.register(scimRoutes);
   await app.register(auditRoutes);
   await app.register(caseRoutes);
+  await app.register(documentRoutes);
 
   return app;
 }

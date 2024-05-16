@@ -1,0 +1,21 @@
+import type { FastifyBaseLogger } from 'fastify';
+import type { Config } from './config';
+import type { AppContext, ServiceOverrides } from './context';
+import type { Database } from './db';
+import { createScanner } from './modules/documents/scanner';
+import { createStorage } from './storage';
+
+export function createContext(
+  config: Config,
+  db: Database,
+  log: FastifyBaseLogger,
+  overrides: ServiceOverrides = {},
+): AppContext {
+  return {
+    config,
+    db,
+    log,
+    storage: overrides.storage ?? createStorage(config),
+    scanner: overrides.scanner ?? createScanner(config),
+  };
+}

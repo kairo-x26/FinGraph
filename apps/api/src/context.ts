@@ -2,6 +2,8 @@ import type { FastifyBaseLogger } from 'fastify';
 import type { Permission, Role } from '@fingraph/shared';
 import type { Config } from './config';
 import type { Database } from './db';
+import type { MalwareScanner } from './modules/documents/scanner';
+import type { ObjectStorage } from './storage';
 
 export interface AuthContext {
   kind: 'user' | 'api_client';
@@ -34,4 +36,9 @@ export interface AppContext {
   config: Config;
   db: Database;
   log: FastifyBaseLogger;
+  storage: ObjectStorage;
+  scanner: MalwareScanner;
 }
+
+/** Overridable services, mainly for tests. */
+export type ServiceOverrides = Partial<Omit<AppContext, 'config' | 'db' | 'log'>>;

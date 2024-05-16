@@ -30,6 +30,7 @@ const schema = z.object({
   S3_BUCKET: z.string().optional(),
   S3_REGION: z.string().optional(),
   S3_ENDPOINT: z.string().optional(),
+  S3_KMS_KEY_ID: z.string().optional(),
 
   /** Default identity provider for tenants without their own SSO configuration. */
   OIDC_ISSUER: z.string().url().default('http://localhost:4100'),

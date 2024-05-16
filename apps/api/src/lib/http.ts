@@ -146,8 +146,10 @@ export function route<B = unknown, Q = unknown, P = unknown>(
       }
 
       if (reply.sent) return reply;
-      if (result === undefined) return reply.code(spec.status ?? 204).send();
-      return reply.code(spec.status ?? 200).send(result);
+      // A handler may pick its own status (e.g. 202 vs 200); otherwise use the route default.
+      const chosen = reply.statusCode !== 200 ? reply.statusCode : undefined;
+      if (result === undefined) return reply.code(chosen ?? spec.status ?? 204).send();
+      return reply.code(chosen ?? spec.status ?? 200).send(result);
     },
   });
 }
