@@ -9,6 +9,7 @@ import { createContext } from './services';
 import { createWorker } from './jobs';
 import type { Worker } from './modules/jobs/worker';
 import { documentRoutes } from './modules/documents/routes';
+import { extractionRoutes } from './modules/extraction/routes';
 import type { Config } from './config';
 import type { Database } from './db';
 import { AppError } from './lib/errors';
@@ -171,6 +172,7 @@ export async function buildApp({ config, db, services }: BuildOptions): Promise<
   await app.register(auditRoutes);
   await app.register(caseRoutes);
   await app.register(documentRoutes);
+  await app.register(extractionRoutes);
 
   return app;
 }

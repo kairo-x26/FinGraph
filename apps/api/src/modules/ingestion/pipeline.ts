@@ -44,8 +44,10 @@ export interface StageState {
   version: VersionRow;
   document: DocumentRow;
   data?: Buffer;
-  /** Arbitrary outputs from earlier stages in this run. */
+  /** Persisted outputs from earlier stages in this run. */
   outputs: Partial<Record<IngestionStage, unknown>>;
+  /** In-memory values shared between stages (parsed document, classification). */
+  scratch: Record<string, unknown>;
   tx: <T>(fn: (tx: Tx) => Promise<T>) => Promise<T>;
   /** Set by a stage to end the pipeline early with a terminal outcome (e.g. quarantine). */
   halt?: { status: 'quarantined' | 'rejected'; reason: string };
@@ -102,7 +104,7 @@ export const scanStage: StageDefinition = {
   },
 };
 
-/** Ordered ingestion stages. */
+/** Ordered ingestion stages; see `stages()` in jobs.ts for the full pipeline. */
 export const PIPELINE: StageDefinition[] = [validateStage, scanStage];
 
 async function recordStage(
@@ -156,7 +158,7 @@ export function ingestionHandler(ctx: AppContext, stages: StageDefinition[] = PI
     if (!loaded) throw new PermanentJobError('not_found', `document version ${versionId} not found`);
     if (['quarantined', 'rejected'].includes(loaded.version.status)) return { outcome: loaded.version.status, skipped: true };
 
-    const s: StageState = { ctx, job, version: loaded.version, document: loaded.document, outputs: {}, tx };
+    const s: StageState = { ctx, job, version: loaded.version, document: loaded.document, outputs: {}, scratch: {}, tx };
 
     const completed = new Set(
       (

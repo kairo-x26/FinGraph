@@ -3,6 +3,7 @@ import type { Permission, Role } from '@fingraph/shared';
 import type { Config } from './config';
 import type { Database } from './db';
 import type { MalwareScanner } from './modules/documents/scanner';
+import type { OcrProvider } from './modules/extraction/ocr';
 import type { ObjectStorage } from './storage';
 
 export interface AuthContext {
@@ -38,6 +39,7 @@ export interface AppContext {
   log: FastifyBaseLogger;
   storage: ObjectStorage;
   scanner: MalwareScanner;
+  ocr: OcrProvider | null;
 }
 
 /** Overridable services, mainly for tests. */

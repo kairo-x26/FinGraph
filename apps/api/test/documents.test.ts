@@ -39,7 +39,12 @@ describe('document upload and ingestion', () => {
     const events = await env.db.system((tx) =>
       tx.many<{ type: string }>(`select type from outbox_events where resource_id = $1 order by seq`, [body.document_id]),
     );
-    expect(events.map((e) => e.type)).toEqual(['document.uploaded', 'document.processing_started', 'document.processed']);
+    expect(events.map((e) => e.type)).toEqual([
+      'document.uploaded',
+      'document.processing_started',
+      'extraction.review_required',
+      'document.processed',
+    ]);
   });
 
   it('stores files encrypted with a checksum and serves downloads with audit', async () => {

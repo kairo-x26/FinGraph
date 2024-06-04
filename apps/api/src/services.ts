@@ -3,6 +3,7 @@ import type { Config } from './config';
 import type { AppContext, ServiceOverrides } from './context';
 import type { Database } from './db';
 import { createScanner } from './modules/documents/scanner';
+import { createOcr } from './modules/extraction/ocr';
 import { createStorage } from './storage';
 
 export function createContext(
@@ -17,5 +18,6 @@ export function createContext(
     log,
     storage: overrides.storage ?? createStorage(config),
     scanner: overrides.scanner ?? createScanner(config),
+    ocr: overrides.ocr !== undefined ? overrides.ocr : createOcr(config),
   };
 }
