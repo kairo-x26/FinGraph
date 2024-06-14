@@ -15,6 +15,7 @@ export interface CaseRow {
   assignee_id: string | null;
   created_by: string | null;
   checklist_template_id: string | null;
+  subject_entity_id: string | null;
   due_at: Date | null;
   closed_at: Date | null;
   created_at: Date;

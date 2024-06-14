@@ -1,12 +1,13 @@
 import type { AppContext } from './context';
 import { reprocessOutdated, REPROCESS_OUTDATED_JOB } from './modules/extraction/routes';
 import { classifyStage, extractStage, parseStage } from './modules/extraction/stages';
+import { graphStage } from './modules/graph/build';
 import { ingestionHandler, INGEST_JOB, scanStage, validateStage, type StageDefinition } from './modules/ingestion/pipeline';
 import { Worker, type WorkerOptions } from './modules/jobs/worker';
 
 /** The full ingestion pipeline, in order. */
 export function ingestionStages(): StageDefinition[] {
-  return [validateStage, scanStage, parseStage, classifyStage, extractStage];
+  return [validateStage, scanStage, parseStage, classifyStage, extractStage, graphStage];
 }
 
 /** Creates a worker with every background job handler registered. */
