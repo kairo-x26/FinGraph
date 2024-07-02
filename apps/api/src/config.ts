@@ -52,11 +52,12 @@ const schema = z.object({
   CLAMAV_PORT: z.coerce.number().int().default(3310),
 
   OCR_PROVIDER: z.enum(['none', 'tesseract']).default('none'),
-  EMBEDDING_PROVIDER: z.enum(['local', 'voyage', 'openai']).default('local'),
+  EMBEDDING_PROVIDER: z.enum(['local', 'voyage']).default('local'),
   EMBEDDING_API_KEY: z.string().optional(),
   LLM_PROVIDER: z.enum(['local', 'anthropic']).default('local'),
   ANTHROPIC_API_KEY: z.string().optional(),
-  ANTHROPIC_MODEL: z.string().default('claude-sonnet-5-5'),
+  ANTHROPIC_MODEL: z.string().default('claude-opus-5-5'),
+  ANTHROPIC_EFFORT: z.enum(['low', 'medium', 'high', 'xhigh', 'max']).default('medium'),
 
   /** Enables POST /v1/organizations for platform operators when set. */
   PLATFORM_ADMIN_TOKEN: z.string().min(24).optional(),

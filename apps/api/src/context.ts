@@ -5,6 +5,8 @@ import type { Database } from './db';
 import type { MalwareScanner } from './modules/documents/scanner';
 import type { OcrProvider } from './modules/extraction/ocr';
 import type { ObjectStorage } from './storage';
+import type { EmbeddingProvider } from './ai/embeddings';
+import type { LlmProvider } from './ai/llm';
 
 export interface AuthContext {
   kind: 'user' | 'api_client';
@@ -40,6 +42,8 @@ export interface AppContext {
   storage: ObjectStorage;
   scanner: MalwareScanner;
   ocr: OcrProvider | null;
+  embeddings: EmbeddingProvider;
+  llm: LlmProvider;
 }
 
 /** Overridable services, mainly for tests. */

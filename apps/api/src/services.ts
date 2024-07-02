@@ -5,6 +5,8 @@ import type { Database } from './db';
 import { createScanner } from './modules/documents/scanner';
 import { createOcr } from './modules/extraction/ocr';
 import { createStorage } from './storage';
+import { createEmbeddings } from './ai/embeddings';
+import { createLlm } from './ai/llm';
 
 export function createContext(
   config: Config,
@@ -19,5 +21,7 @@ export function createContext(
     storage: overrides.storage ?? createStorage(config),
     scanner: overrides.scanner ?? createScanner(config),
     ocr: overrides.ocr !== undefined ? overrides.ocr : createOcr(config),
+    embeddings: overrides.embeddings ?? createEmbeddings(config),
+    llm: overrides.llm ?? createLlm(config),
   };
 }
