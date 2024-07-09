@@ -29,7 +29,7 @@ describe('processing results', () => {
     expect(cats[docs.formation!]).toBe('certificate_of_incorporation');
     expect(cats[docs.bank!]).toBe('bank_statement');
     const jobs = await c.analyst.get(`/v1/documents/${docs.ubo}/jobs`);
-    expect(jobs.json().items[0].stages.map((s: { stage: string }) => s.stage)).toEqual(['validate', 'scan', 'parse', 'classify', 'extract', 'graph']);
+    expect(jobs.json().items[0].stages.map((s: { stage: string }) => s.stage)).toEqual(['validate', 'scan', 'parse', 'classify', 'extract', 'index', 'graph']);
   });
 
   it('satisfies the checklist once required documents are processed', async () => {
