@@ -46,7 +46,7 @@ interface FactLite {
  * Rule-based discrepancy detection over a case's extracted facts, ownership graph
  * and checklist. Findings point at their evidence; resolving them is a human task.
  */
-export async function caseDiscrepancies(tx: Tx, caseId: string, userId: string | null): Promise<Discrepancy[]> {
+export async function caseDiscrepancies(tx: Tx, caseId: string, userId: string | null, uboThreshold = 25): Promise<Discrepancy[]> {
   const out: Discrepancy[] = [];
   const c = (await tx.one<{ subject_name: string; checklist_template_id: string | null }>(
     'select subject_name, checklist_template_id from cases where id = $1',
@@ -63,7 +63,7 @@ export async function caseDiscrepancies(tx: Tx, caseId: string, userId: string |
 
   // 1. beneficial owners implied by the structure but not declared
   const hasDeclaration = facts.some((f) => f.category === 'beneficial_ownership');
-  const rollup = await ownershipRollup(tx, caseId, userId);
+  const rollup = await ownershipRollup(tx, caseId, userId, uboThreshold);
   if (hasDeclaration) {
     for (const o of rollup.owners) {
       if (o.kind !== 'individual' || o.effective_pct < rollup.threshold || o.declared) continue;

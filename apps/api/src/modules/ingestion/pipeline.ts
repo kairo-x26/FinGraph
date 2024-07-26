@@ -4,6 +4,7 @@ import type { Tx } from '../../db';
 import { sha256Hex } from '../../lib/crypto';
 import { recordAudit } from '../audit/service';
 import { emitEvent } from '../events/outbox';
+import { notify } from '../notifications/service';
 import { detectMime, isSupportedMime, mimeMatches } from '../documents/filetypes';
 import { classifyError, PermanentJobError } from '../jobs/errors';
 import type { JobContext } from '../jobs/worker';
@@ -23,6 +24,7 @@ export interface VersionRow {
   status: string;
   source: string;
   page_count: number | null;
+  uploaded_by: string | null;
   created_at: Date;
 }
 
@@ -214,6 +216,16 @@ export function ingestionHandler(ctx: AppContext, stages: StageDefinition[] = PI
             type: 'document.processing_failed',
             resource: { type: 'document', id: s.document.id },
             data: { version_id: versionId, case_id: s.document.case_id, error_type: e.type, attempts: job.attempts },
+          });
+          const c = await t.one<{ assignee_id: string | null; reference: string }>('select assignee_id, reference from cases where id = $1', [s.document.case_id]);
+          await notify(t, {
+            tenantId: job.tenant_id,
+            userIds: [c?.assignee_id, s.version.uploaded_by],
+            type: 'document.processing_failed',
+            title: `${s.document.title} could not be processed`,
+            body: `${c?.reference ?? ''}: ${e.message.slice(0, 200)}`,
+            link: `/cases/${s.document.case_id}?document=${s.document.id}`,
+            resource: { type: 'document', id: s.document.id },
           });
           await recordAudit(t, {
             tenantId: job.tenant_id,

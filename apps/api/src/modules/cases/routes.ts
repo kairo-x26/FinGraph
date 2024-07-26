@@ -9,6 +9,8 @@ import { audit } from '../audit/service';
 import { emitEvent } from '../events/outbox';
 import { caseVisibleSql, getVisibleCase, isClosed, type CaseRow } from './access';
 import { checklistItemSchema, currentTemplate, evaluateChecklist, publishTemplate } from './checklists';
+import { notify } from '../notifications/service';
+import { activePolicy } from '../workflow/policies';
 
 const CASE_PREFIX: Record<CaseType, string> = {
   kyb_onboarding: 'KYB',
@@ -61,11 +63,12 @@ export async function caseRoutes(app: FastifyInstance) {
       return tx(async (t) => {
         if (body.assignee_id) await assertAssignable(t, body.assignee_id);
         const template = await currentTemplate(t, auth.tenantId, body.case_type);
+        const policy = await activePolicy(t, auth.tenantId, body.case_type);
         const reference = await nextReference(t, auth.tenantId, body.case_type);
         const c = await t.one<CaseRow>(
           `insert into cases (tenant_id, reference, case_type, subject_name, customer_ref, risk_level, restricted,
-                              assignee_id, created_by, checklist_template_id, due_at)
-           values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) returning *`,
+                              assignee_id, created_by, checklist_template_id, due_at, policy_id)
+           values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) returning *`,
           [
             auth.tenantId,
             reference,
@@ -78,14 +81,27 @@ export async function caseRoutes(app: FastifyInstance) {
             auth.userId,
             template.id,
             body.due_at ?? null,
+            policy.id || null,
           ],
         );
         await audit(t, req, {
           action: 'case.created',
           resourceType: 'case',
           resourceId: c!.id,
-          details: { reference, case_type: body.case_type, checklist_version: template.version },
+          details: { reference, case_type: body.case_type, checklist_version: template.version, policy_version: policy.version },
         });
+        if (body.assignee_id) {
+          await notify(t, {
+            tenantId: auth.tenantId,
+            userIds: [body.assignee_id],
+            exclude: auth.userId,
+            type: 'case.assigned',
+            title: `${reference} was assigned to you`,
+            body: body.subject_name,
+            link: `/cases/${c!.id}`,
+            resource: { type: 'case', id: c!.id },
+          });
+        }
         if (body.assignee_id) {
           await emitEvent(t, {
             tenantId: auth.tenantId,
@@ -236,6 +252,16 @@ export async function caseRoutes(app: FastifyInstance) {
         resource: { type: 'case', id: caseId },
         data: { assignee_id: assigneeId, previous_assignee_id: before.assignee_id, reference: before.reference },
         correlationId: req.id,
+      });
+      await notify(t, {
+        tenantId: auth.tenantId,
+        userIds: [assigneeId],
+        exclude: auth.userId,
+        type: 'case.assigned',
+        title: `${before.reference} was assigned to you`,
+        body: before.subject_name,
+        link: `/cases/${caseId}`,
+        resource: { type: 'case', id: caseId },
       });
     }
     return c;

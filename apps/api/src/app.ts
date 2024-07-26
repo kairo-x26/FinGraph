@@ -12,6 +12,8 @@ import { documentRoutes } from './modules/documents/routes';
 import { extractionRoutes } from './modules/extraction/routes';
 import { graphRoutes } from './modules/graph/routes';
 import { retrievalRoutes } from './modules/retrieval/routes';
+import { workflowRoutes } from './modules/workflow/routes';
+import { notificationRoutes } from './modules/notifications/routes';
 import type { Config } from './config';
 import type { Database } from './db';
 import { AppError } from './lib/errors';
@@ -177,6 +179,8 @@ export async function buildApp({ config, db, services }: BuildOptions): Promise<
   await app.register(extractionRoutes);
   await app.register(graphRoutes);
   await app.register(retrievalRoutes);
+  await app.register(workflowRoutes);
+  await app.register(notificationRoutes);
 
   return app;
 }

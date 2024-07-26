@@ -204,3 +204,10 @@ export async function uploadDocument(
   if (put.statusCode !== 200) return put;
   return c.post('/v1/documents', { upload_id: init.json().upload_id, ...extra });
 }
+
+/** Approves every candidate critical fact in a case (as the given reviewer). */
+export async function approveCriticalFacts(c: Client, caseId: string) {
+  const facts = (await c.get(`/v1/cases/${caseId}/facts?critical=true&status=candidate`)).json().items as { id: string }[];
+  for (const f of facts) await c.post(`/v1/extracted-facts/${f.id}/reviews`, { action: 'approve' });
+  return facts.length;
+}
