@@ -159,7 +159,7 @@ export function client(app: FastifyInstance, session: Session | null) {
     post: (url: string, body?: unknown, headers?: Record<string, string>) => call('POST', url, body ?? {}, headers),
     put: (url: string, body?: unknown, headers?: Record<string, string>) => call('PUT', url, body ?? {}, headers),
     patch: (url: string, body?: unknown, headers?: Record<string, string>) => call('PATCH', url, body ?? {}, headers),
-    delete: (url: string, headers?: Record<string, string>) => call('DELETE', url, undefined, headers),
+    delete: (url: string, body?: unknown, headers?: Record<string, string>) => call('DELETE', url, body, headers),
   };
 }
 

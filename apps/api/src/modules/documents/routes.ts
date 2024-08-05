@@ -546,27 +546,6 @@ export async function documentRoutes(app: FastifyInstance) {
     });
   }
 
-  route(app, {
-    method: 'DELETE',
-    url: '/v1/documents/:id',
-    summary: 'Delete a document (soft delete; blocked by legal holds)',
-    tags: ['documents'],
-    permission: 'document:delete',
-    params: uuidParam,
-    body: z.object({ reason: z.string().trim().min(5).max(500) }),
-    handler: async ({ params, body, auth, req, tx }) =>
-      tx(async (t) => {
-        const d = await getVisibleDocument(t, auth, params.id);
-        await t.query('update documents set deleted_at = now() where id = $1', [params.id]);
-        await audit(t, req, {
-          action: 'document.deleted',
-          resourceType: 'document',
-          resourceId: params.id,
-          details: { case_id: d.case_id, reason: body.reason },
-        });
-      }),
-  });
-
   // ---- ingestion jobs
 
   async function jobView(t: Tx, auth: AuthContext, jobId: string) {
