@@ -6,7 +6,7 @@ import swaggerUi from '@fastify/swagger-ui';
 import { randomUUID } from 'node:crypto';
 import type { AppContext, AuthContext, ServiceOverrides } from './context';
 import { createContext } from './services';
-import { createWorker } from './jobs';
+import { createScheduler, createWorker } from './jobs';
 import type { Worker } from './modules/jobs/worker';
 import { documentRoutes } from './modules/documents/routes';
 import { extractionRoutes } from './modules/extraction/routes';
@@ -14,6 +14,8 @@ import { graphRoutes } from './modules/graph/routes';
 import { retrievalRoutes } from './modules/retrieval/routes';
 import { workflowRoutes } from './modules/workflow/routes';
 import { notificationRoutes } from './modules/notifications/routes';
+import { governanceRoutes } from './modules/governance/routes';
+import { metricsRoutes } from './modules/metrics/routes';
 import type { Config } from './config';
 import type { Database } from './db';
 import { AppError } from './lib/errors';
@@ -81,10 +83,17 @@ export async function buildApp({ config, db, services }: BuildOptions): Promise<
   // The worker is always constructed (tests drain it); it only polls when WORKER_INLINE is set.
   const worker = createWorker(ctx);
   app.decorate('worker', worker);
+  const scheduler = createScheduler(ctx);
   if (config.WORKER_INLINE) {
-    app.addHook('onReady', async () => worker.start());
+    app.addHook('onReady', async () => {
+      worker.start();
+      scheduler.start();
+    });
   }
-  app.addHook('onClose', async () => worker.stop());
+  app.addHook('onClose', async () => {
+    scheduler.stop();
+    await worker.stop();
+  });
   app.decorateRequest('auth', null);
 
   app.addHook('onRequest', async (req, reply) => {
@@ -181,6 +190,8 @@ export async function buildApp({ config, db, services }: BuildOptions): Promise<
   await app.register(retrievalRoutes);
   await app.register(workflowRoutes);
   await app.register(notificationRoutes);
+  await app.register(governanceRoutes);
+  await app.register(metricsRoutes);
 
   return app;
 }

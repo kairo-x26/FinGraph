@@ -2,7 +2,7 @@ import pino from 'pino';
 import { loadConfig } from './config';
 import { createDatabase } from './db';
 import { migrate } from './db/migrate';
-import { createWorker } from './jobs';
+import { createScheduler, createWorker } from './jobs';
 import { createContext } from './services';
 
 const config = loadConfig();
@@ -12,10 +12,13 @@ await migrate(db, (m) => log.info(`applied ${m}`));
 const ctx = createContext(config, db, log);
 const worker = createWorker(ctx);
 worker.start();
+const scheduler = createScheduler(ctx);
+scheduler.start();
 log.info({ worker: worker.id, kinds: worker.kinds }, 'worker started');
 
 const shutdown = async (signal: string) => {
   log.info({ signal }, 'stopping worker');
+  scheduler.stop();
   await worker.stop();
   await db.close();
   process.exit(0);
