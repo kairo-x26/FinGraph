@@ -104,3 +104,25 @@ export const ROLE_LABELS: Record<Role, string> = {
   auditor: 'Internal auditor',
   developer: 'Integration developer',
 };
+
+/** OAuth scopes for API clients and the permissions each grants. */
+export const API_SCOPES = {
+  'cases:read': ['case:read'],
+  'cases:write': ['case:read', 'case:create', 'case:update', 'case:assign'],
+  'documents:read': ['document:read', 'document:download'],
+  'documents:write': ['document:read', 'document:upload'],
+  'facts:review': ['fact:review', 'document:read'],
+  'graph:read': ['graph:read'],
+  'rag:query': ['rag:query'],
+  'audit:read': ['audit:read'],
+  'audit:export': ['audit:export'],
+  'webhooks:manage': ['webhook:manage'],
+} as const satisfies Record<string, readonly Permission[]>;
+export type ApiScope = keyof typeof API_SCOPES;
+export const API_SCOPE_LIST = Object.keys(API_SCOPES) as ApiScope[];
+
+export function permissionsForScopes(scopes: readonly string[]): Set<Permission> {
+  const out = new Set<Permission>();
+  for (const s of scopes) for (const p of API_SCOPES[s as ApiScope] ?? []) out.add(p);
+  return out;
+}

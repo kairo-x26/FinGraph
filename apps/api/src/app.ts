@@ -1,6 +1,7 @@
 import Fastify, { type FastifyError, type FastifyInstance } from 'fastify';
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
+import formbody from '@fastify/formbody';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { randomUUID } from 'node:crypto';
@@ -26,6 +27,8 @@ import { adminRoutes } from './modules/identity/admin-routes';
 import { authRoutes, identityHooks } from './modules/identity/auth-routes';
 import { scimRoutes } from './modules/identity/scim';
 import { registerRateLimit } from './lib/rate-limit';
+import { registerIdempotency } from './lib/idempotency';
+import { apiClientRoutes } from './modules/integrations/api-clients';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -146,6 +149,7 @@ export async function buildApp({ config, db, services }: BuildOptions): Promise<
   });
 
   await app.register(cookie, { secret: config.APP_SECRET });
+  await app.register(formbody);
   await app.register(cors, {
     origin: [config.WEB_URL],
     credentials: true,
@@ -177,6 +181,7 @@ export async function buildApp({ config, db, services }: BuildOptions): Promise<
 
   await identityHooks(app);
   registerRateLimit(app, config.RATE_LIMIT_PER_MINUTE);
+  registerIdempotency(app);
 
   await app.register(healthRoutes);
   await app.register(authRoutes);
@@ -192,6 +197,7 @@ export async function buildApp({ config, db, services }: BuildOptions): Promise<
   await app.register(notificationRoutes);
   await app.register(governanceRoutes);
   await app.register(metricsRoutes);
+  await app.register(apiClientRoutes);
 
   return app;
 }

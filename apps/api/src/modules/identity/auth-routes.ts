@@ -4,6 +4,7 @@ import { ROLE_LABELS } from '@fingraph/shared';
 import { randomToken, safeEqual, sha256Hex } from '../../lib/crypto';
 import { route } from '../../lib/http';
 import { recordAudit } from '../audit/service';
+import { resolveBearer } from '../integrations/api-clients';
 import { hasMfa, OidcClient, OidcError, pkcePair } from './oidc';
 import {
   createSession,
@@ -27,6 +28,11 @@ export async function identityHooks(app: FastifyInstance) {
   const { config, db } = app.ctx;
 
   app.addHook('onRequest', async (req) => {
+    const header = req.headers.authorization;
+    if (header?.startsWith('Bearer ') && !req.url.startsWith('/scim/')) {
+      req.auth = await resolveBearer(db, config, header.slice(7));
+      return;
+    }
     const token = req.cookies[SESSION_COOKIE];
     if (token) req.auth = await resolveSession(db, config, token, req.ip);
   });
