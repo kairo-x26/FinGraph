@@ -7,7 +7,8 @@ import swaggerUi from '@fastify/swagger-ui';
 import { randomUUID } from 'node:crypto';
 import type { AppContext, AuthContext, ServiceOverrides } from './context';
 import { createContext } from './services';
-import { createScheduler, createWorker } from './jobs';
+import { createDispatcher, createScheduler, createWorker } from './jobs';
+import { webhookRoutes } from './modules/integrations/webhook-routes';
 import type { Worker } from './modules/jobs/worker';
 import { documentRoutes } from './modules/documents/routes';
 import { extractionRoutes } from './modules/extraction/routes';
@@ -87,14 +88,17 @@ export async function buildApp({ config, db, services }: BuildOptions): Promise<
   const worker = createWorker(ctx);
   app.decorate('worker', worker);
   const scheduler = createScheduler(ctx);
+  const dispatcher = createDispatcher(ctx);
   if (config.WORKER_INLINE) {
     app.addHook('onReady', async () => {
       worker.start();
       scheduler.start();
+      dispatcher.start();
     });
   }
   app.addHook('onClose', async () => {
     scheduler.stop();
+    dispatcher.stop();
     await worker.stop();
   });
   app.decorateRequest('auth', null);
@@ -198,6 +202,7 @@ export async function buildApp({ config, db, services }: BuildOptions): Promise<
   await app.register(governanceRoutes);
   await app.register(metricsRoutes);
   await app.register(apiClientRoutes);
+  await app.register(webhookRoutes);
 
   return app;
 }

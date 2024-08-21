@@ -62,6 +62,9 @@ const schema = z.object({
   /** Enables POST /v1/organizations for platform operators when set. */
   PLATFORM_ADMIN_TOKEN: z.string().min(24).optional(),
 
+  /** Allow webhook URLs that resolve to private or loopback addresses (defaults to on outside production). */
+  WEBHOOK_ALLOW_PRIVATE: bool.optional(),
+
   RATE_LIMIT_PER_MINUTE: z.coerce.number().int().default(600),
 
   GOOGLE_CLIENT_ID: z.string().optional(),
