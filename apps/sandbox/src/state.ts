@@ -1,3 +1,4 @@
+import type { DriveFile } from './drive';
 import type { SandboxClient, SandboxUser } from './idp';
 
 export interface SandboxState {
@@ -7,6 +8,7 @@ export interface SandboxState {
   accessTokenTtlSec: number;
   refreshTokens: Map<string, { sub: string; scope: string; client_id: string; revoked: boolean }>;
   resolveAccessToken: (token: string) => { sub: string; scope: string; client_id: string } | null;
+  driveFiles: Map<string, DriveFile>;
 }
 
 export const DEFAULT_USERS: SandboxUser[] = [

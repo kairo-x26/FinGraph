@@ -269,6 +269,9 @@ importers:
       '@fastify/formbody':
         specifier: ^9.0.1
         version: 9.0.1
+      '@fingraph/fixtures':
+        specifier: workspace:*
+        version: link:../../packages/fixtures
       fastify:
         specifier: ^5.12.7
         version: 5.12.7

@@ -1,5 +1,6 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import formbody from '@fastify/formbody';
+import { registerDrive } from './drive';
 import { registerIdp, type SandboxClient, type SandboxUser } from './idp';
 import { DEFAULT_USERS, defaultClients, type SandboxState } from './state';
 
@@ -34,8 +35,10 @@ export async function createSandbox(opts: SandboxOptions = {}): Promise<Sandbox>
     accessTokenTtlSec: opts.accessTokenTtlSec ?? 3600,
     refreshTokens: new Map(),
     resolveAccessToken: () => null,
+    driveFiles: new Map(),
   };
   await registerIdp(app, state);
+  await registerDrive(app, state);
 
   return {
     app,

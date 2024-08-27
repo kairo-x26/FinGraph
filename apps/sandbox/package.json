@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@fastify/formbody": "^9.0.1",
+    "@fingraph/fixtures": "workspace:*",
     "fastify": "^5.12.7",
     "jose": "^6.2.12"
   }
