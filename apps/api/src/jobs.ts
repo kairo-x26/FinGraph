@@ -10,6 +10,7 @@ import { activeHold, deleteObjects, purgeDocumentData, PURGE_DOCUMENT_JOB, RETEN
 import { recordAudit } from './modules/audit/service';
 import { Scheduler } from './modules/jobs/scheduler';
 import { OutboxDispatcher, WEBHOOK_JOB, webhookHandler } from './modules/integrations/webhooks';
+import { SYNC_JOB, syncHandler } from './modules/integrations/connections';
 
 /** The full ingestion pipeline, in order. */
 export function ingestionStages(): StageDefinition[] {
@@ -26,6 +27,7 @@ export function createWorker(ctx: AppContext, opts: WorkerOptions = {}) {
   worker.register(INGEST_JOB, ingestionHandler(ctx, ingestionStages()));
   worker.register(BUILD_EXPORT_JOB, exportHandler(ctx));
   worker.register(WEBHOOK_JOB, webhookHandler(ctx));
+  worker.register(SYNC_JOB, syncHandler(ctx));
   worker.register(RETENTION_SWEEP_JOB, async ({ job }) => runRetentionSweep(ctx, job.tenant_id));
   worker.register(PURGE_DOCUMENT_JOB, async ({ job }) => {
     const documentId = String(job.payload.document_id);

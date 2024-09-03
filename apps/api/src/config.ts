@@ -70,6 +70,10 @@ const schema = z.object({
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   SANDBOX_URL: z.string().url().default('http://localhost:4100'),
+  /** Enable the sandbox document repository connector (on by default outside production). */
+  SANDBOX_CONNECTOR: bool.optional(),
+  SANDBOX_CONNECTOR_CLIENT_ID: z.string().default('fingraph-connector'),
+  SANDBOX_CONNECTOR_CLIENT_SECRET: z.string().default('dev-connector-secret'),
 });
 
 export type Config = z.infer<typeof schema>;

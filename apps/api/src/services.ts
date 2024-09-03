@@ -7,6 +7,7 @@ import { createOcr } from './modules/extraction/ocr';
 import { createStorage } from './storage';
 import { createEmbeddings } from './ai/embeddings';
 import { createLlm } from './ai/llm';
+import { connectorProviders } from './modules/integrations/providers';
 
 export function createContext(
   config: Config,
@@ -23,5 +24,6 @@ export function createContext(
     ocr: overrides.ocr !== undefined ? overrides.ocr : createOcr(config),
     embeddings: overrides.embeddings ?? createEmbeddings(config),
     llm: overrides.llm ?? createLlm(config),
+    connectors: overrides.connectors ?? connectorProviders(config),
   };
 }

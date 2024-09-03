@@ -9,6 +9,7 @@ import type { AppContext, AuthContext, ServiceOverrides } from './context';
 import { createContext } from './services';
 import { createDispatcher, createScheduler, createWorker } from './jobs';
 import { webhookRoutes } from './modules/integrations/webhook-routes';
+import { connectionRoutes } from './modules/integrations/connections';
 import type { Worker } from './modules/jobs/worker';
 import { documentRoutes } from './modules/documents/routes';
 import { extractionRoutes } from './modules/extraction/routes';
@@ -203,6 +204,7 @@ export async function buildApp({ config, db, services }: BuildOptions): Promise<
   await app.register(metricsRoutes);
   await app.register(apiClientRoutes);
   await app.register(webhookRoutes);
+  await app.register(connectionRoutes);
 
   return app;
 }

@@ -7,6 +7,7 @@ import type { OcrProvider } from './modules/extraction/ocr';
 import type { ObjectStorage } from './storage';
 import type { EmbeddingProvider } from './ai/embeddings';
 import type { LlmProvider } from './ai/llm';
+import type { ConnectorProvider } from './modules/integrations/providers';
 
 export interface AuthContext {
   kind: 'user' | 'api_client';
@@ -44,6 +45,7 @@ export interface AppContext {
   ocr: OcrProvider | null;
   embeddings: EmbeddingProvider;
   llm: LlmProvider;
+  connectors: Map<string, ConnectorProvider>;
 }
 
 /** Overridable services, mainly for tests. */
