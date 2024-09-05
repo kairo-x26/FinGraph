@@ -9,7 +9,8 @@
     "build": "tsup",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "migrate": "tsx src/db/cli.ts"
+    "migrate": "tsx src/db/cli.ts",
+    "seed": "tsx scripts/seed.ts"
   },
   "devDependencies": {
     "@fingraph/fixtures": "workspace:*",
