@@ -11,7 +11,7 @@ const schema = z.object({
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
 
   /** Public URL of this API, used for OAuth callbacks and signed upload URLs. */
-  PUBLIC_API_URL: z.string().url().default('http://localhost:4000'),
+  PUBLIC_API_URL: z.string().url().default('http://localhost:3000/api'),
   /** URL of the web application, used for post-login redirects and CORS. */
   WEB_URL: z.string().url().default('http://localhost:3000'),
 

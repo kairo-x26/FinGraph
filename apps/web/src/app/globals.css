@@ -1,0 +1,192 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/public-sans';
+@import '@fontsource-variable/source-serif-4';
+
+/* ---------------------------------------------------------------------------
+   Design tokens (see docs/DESIGN.md). Light is the default; dark follows the
+   OS unless the user picks a theme (data-theme on <html>).
+   ------------------------------------------------------------------------- */
+:root {
+  --ink: #1d2b36;
+  --ink-muted: #5a6b76;
+  --ink-faint: #8796a0;
+  --paper: #eef1ee;
+  --sheet: #ffffff;
+  --sheet-sunk: #f6f8f6;
+  --rule: #d3dad6;
+  --rule-strong: #b8c3be;
+  --register: #0b5d6b;
+  --register-ink: #ffffff;
+  --register-soft: #dcecee;
+  --marker: #f3dc55;
+  --marker-soft: #fbf1b8;
+  --verified: #2e7d4f;
+  --verified-soft: #e2f1e7;
+  --candidate: #9a6100;
+  --candidate-soft: #fbefd9;
+  --conflict: #b3261e;
+  --conflict-soft: #f8e1df;
+  --shadow-sheet: 0 1px 0 rgba(29, 43, 54, 0.06), 0 8px 24px -12px rgba(29, 43, 54, 0.18);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --ink: #dce4e8;
+    --ink-muted: #93a4ae;
+    --ink-faint: #6b7d88;
+    --paper: #0f1b22;
+    --sheet: #16252e;
+    --sheet-sunk: #12212a;
+    --rule: #2a3b45;
+    --rule-strong: #3a4f5b;
+    --register: #5eb7c6;
+    --register-ink: #0b1d23;
+    --register-soft: #183a42;
+    --marker: #8a7a1f;
+    --marker-soft: #4a4316;
+    --verified: #62c08a;
+    --verified-soft: #17362a;
+    --candidate: #e3a94a;
+    --candidate-soft: #3d2f15;
+    --conflict: #f08a80;
+    --conflict-soft: #44201d;
+    --shadow-sheet: 0 1px 0 rgba(0, 0, 0, 0.3), 0 10px 30px -14px rgba(0, 0, 0, 0.6);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --ink: #dce4e8;
+  --ink-muted: #93a4ae;
+  --ink-faint: #6b7d88;
+  --paper: #0f1b22;
+  --sheet: #16252e;
+  --sheet-sunk: #12212a;
+  --rule: #2a3b45;
+  --rule-strong: #3a4f5b;
+  --register: #5eb7c6;
+  --register-ink: #0b1d23;
+  --register-soft: #183a42;
+  --marker: #8a7a1f;
+  --marker-soft: #4a4316;
+  --verified: #62c08a;
+  --verified-soft: #17362a;
+  --candidate: #e3a94a;
+  --candidate-soft: #3d2f15;
+  --conflict: #f08a80;
+  --conflict-soft: #44201d;
+  --shadow-sheet: 0 1px 0 rgba(0, 0, 0, 0.3), 0 10px 30px -14px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-paper: var(--paper);
+  --color-sheet: var(--sheet);
+  --color-sheet-sunk: var(--sheet-sunk);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-register: var(--register);
+  --color-register-ink: var(--register-ink);
+  --color-register-soft: var(--register-soft);
+  --color-marker: var(--marker);
+  --color-marker-soft: var(--marker-soft);
+  --color-verified: var(--verified);
+  --color-verified-soft: var(--verified-soft);
+  --color-candidate: var(--candidate);
+  --color-candidate-soft: var(--candidate-soft);
+  --color-conflict: var(--conflict);
+  --color-conflict-soft: var(--conflict-soft);
+
+  --font-sans: 'Public Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Source Serif 4 Variable', ui-serif, Georgia, serif;
+
+  --text-2xs: 0.75rem;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+
+  --shadow-sheet: var(--shadow-sheet);
+  --radius-control: 5px;
+  --radius-sheet: 8px;
+}
+
+html {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  font-feature-settings: 'tnum' 1, 'cv11' 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--register);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+::selection {
+  background: var(--register-soft);
+}
+
+/* Source text quoted from customer documents. */
+.source-text {
+  font-family: var(--font-serif);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  font-feature-settings: 'tnum' 0, 'onum' 1;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* The evidence highlight: the product's signature mark. */
+mark.evidence {
+  background: linear-gradient(transparent 12%, var(--marker) 12%, var(--marker) 88%, transparent 88%);
+  color: inherit;
+  padding: 0 0.08em;
+  border-radius: 2px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+mark.evidence[data-active='true'] {
+  animation: evidence-pulse 900ms ease-out 1;
+  outline: 1.5px solid color-mix(in srgb, var(--marker) 60%, var(--ink));
+  outline-offset: 1px;
+}
+
+@keyframes evidence-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--marker) 80%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+dialog::backdrop {
+  background: color-mix(in srgb, var(--ink) 35%, transparent);
+}

@@ -4,13 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch --clear-screen=false src/main.ts",
+    "dev": "tsx watch --clear-screen=false --env-file-if-exists=.env src/main.ts",
     "start": "node dist/main.js",
     "build": "tsup",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "migrate": "tsx src/db/cli.ts",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx --env-file-if-exists=.env scripts/seed.ts"
   },
   "devDependencies": {
     "@fingraph/fixtures": "workspace:*",
