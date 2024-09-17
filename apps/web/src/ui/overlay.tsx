@@ -85,7 +85,9 @@ export function Drawer({ open, onClose, title, children, width = 'w-[min(720px,1
             <X className="size-4" />
           </IconButton>
         </header>
-        <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
+        <div data-scroll-panel className="min-h-0 flex-1 overflow-y-auto">
+          {children}
+        </div>
       </aside>
       <style>{`@keyframes drawer-in { from { transform: translateX(24px); opacity: .6 } to { transform: none; opacity: 1 } }`}</style>
     </div>

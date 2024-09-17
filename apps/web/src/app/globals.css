@@ -163,6 +163,10 @@ mark.evidence {
   -webkit-box-decoration-break: clone;
 }
 
+mark.evidence[data-quiet='true'] {
+  background: linear-gradient(transparent 12%, var(--marker-soft) 12%, var(--marker-soft) 88%, transparent 88%);
+}
+
 mark.evidence[data-active='true'] {
   animation: evidence-pulse 900ms ease-out 1;
   outline: 1.5px solid color-mix(in srgb, var(--marker) 60%, var(--ink));

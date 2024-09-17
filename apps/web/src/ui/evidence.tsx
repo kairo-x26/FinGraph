@@ -34,7 +34,12 @@ export function SourcePage({ text, highlights = [], pageNo, ocr }: { text: strin
   }, [text, highlights]);
 
   useEffect(() => {
-    activeRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    // scroll only the nearest scrolling panel, never the whole window
+    const el = activeRef.current;
+    const panel = el?.closest('[data-scroll-panel]') as HTMLElement | null;
+    if (!el || !panel) return;
+    const top = el.getBoundingClientRect().top - panel.getBoundingClientRect().top + panel.scrollTop - panel.clientHeight / 3;
+    panel.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
   }, [highlights]);
 
   return (
@@ -46,7 +51,14 @@ export function SourcePage({ text, highlights = [], pageNo, ocr }: { text: strin
       <div className="source-text max-w-[72ch]">
         {segments.map((s, i) =>
           s.h ? (
-            <mark key={i} ref={s.h.active ? activeRef : undefined} className="evidence" data-active={s.h.active ? 'true' : undefined} title={s.h.label}>
+            <mark
+              key={i}
+              ref={s.h.active ? activeRef : undefined}
+              className="evidence"
+              data-active={s.h.active ? 'true' : undefined}
+              data-quiet={!s.h.active && highlights.some((h) => h.active) ? 'true' : undefined}
+              title={s.h.label}
+            >
               {s.text}
             </mark>
           ) : (

@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { Shell } from '@/components/shell';
+import { SourceViewerProvider } from '@/components/source-viewer';
 import { SessionGate } from '@/lib/session';
 
 export default function AppLayout({ children }: { children: ReactNode }) {
@@ -13,7 +14,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         </div>
       }
     >
-      <Shell>{children}</Shell>
+      <SourceViewerProvider>
+        <Shell>{children}</Shell>
+      </SourceViewerProvider>
     </SessionGate>
   );
 }
