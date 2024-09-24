@@ -6,10 +6,13 @@ import { CaseHeader } from '@/components/case/header';
 import { Evidence } from '@/components/case/evidence';
 import { useCase, useDocuments, useFacts } from '@/components/case/hooks';
 import { Overview } from '@/components/case/overview';
+import { GraphTab } from '@/components/case/graph-tab';
+import { AskTab } from '@/components/case/ask-tab';
+import { ActivityTab, DecisionsTab, ExportsTab } from '@/components/case/records';
 import { ApiError } from '@/lib/api';
 import { LoadingRows, Notice, Tabs } from '@/ui';
 
-const TABS = ['overview', 'evidence'] as const;
+const TABS = ['overview', 'evidence', 'graph', 'ask', 'decisions', 'activity', 'exports'] as const;
 type Tab = (typeof TABS)[number];
 
 function CaseWorkspace() {
@@ -47,10 +50,20 @@ function CaseWorkspace() {
         tabs={[
           { id: 'overview', label: 'Overview' },
           { id: 'evidence', label: 'Evidence', count: facts.data?.counts.candidate ?? docs.data?.length },
+          { id: 'graph', label: 'Relationships' },
+          { id: 'ask', label: 'Ask' },
+          { id: 'decisions', label: 'Decisions' },
+          { id: 'activity', label: 'Activity' },
+          { id: 'exports', label: 'Exports' },
         ]}
       />
       {tab === 'overview' && <Overview c={c.data} />}
       {tab === 'evidence' && <Evidence c={c.data} initialDocument={params.get('document')} />}
+      {tab === 'graph' && <GraphTab c={c.data} />}
+      {tab === 'ask' && <AskTab c={c.data} />}
+      {tab === 'decisions' && <DecisionsTab c={c.data} />}
+      {tab === 'activity' && <ActivityTab c={c.data} />}
+      {tab === 'exports' && <ExportsTab c={c.data} />}
     </div>
   );
 }
