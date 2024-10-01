@@ -27,6 +27,9 @@
   --conflict: #b3261e;
   --conflict-soft: #f8e1df;
   --shadow-sheet: 0 1px 0 rgba(29, 43, 54, 0.06), 0 8px 24px -12px rgba(29, 43, 54, 0.18);
+  /* chart series, validated for colour-vision deficiency on the sheet surface */
+  --series-1: #0089a0;
+  --series-2: #eb6834;
   color-scheme: light;
 }
 
@@ -52,6 +55,8 @@
     --conflict: #f08a80;
     --conflict-soft: #44201d;
     --shadow-sheet: 0 1px 0 rgba(0, 0, 0, 0.3), 0 10px 30px -14px rgba(0, 0, 0, 0.6);
+    --series-1: #1fa2b5;
+    --series-2: #d95926;
     color-scheme: dark;
   }
 }
@@ -77,6 +82,8 @@
   --conflict: #f08a80;
   --conflict-soft: #44201d;
   --shadow-sheet: 0 1px 0 rgba(0, 0, 0, 0.3), 0 10px 30px -14px rgba(0, 0, 0, 0.6);
+  --series-1: #1fa2b5;
+  --series-2: #d95926;
   color-scheme: dark;
 }
 
