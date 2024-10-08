@@ -89,6 +89,9 @@ interface Event {
 export function describeAction(e: Pick<Event, 'action' | 'details'>): string {
   const d = e.details ?? {};
   const map: Record<string, string> = {
+    'auth.login': 'Signed in',
+    'auth.logout': 'Signed out',
+    'auth.login_failed': `Sign-in refused (${String(d.reason ?? '').replace(/_/g, ' ')})`,
     'case.created': 'Created the case',
     'case.updated': 'Updated case details',
     'case.assigned': 'Changed the reviewer',
