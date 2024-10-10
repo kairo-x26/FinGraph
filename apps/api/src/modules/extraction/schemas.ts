@@ -149,13 +149,13 @@ export const SCHEMAS: Partial<Record<DocumentCategory, CategorySchema>> = {
     tables: [
       {
         group: 'ownership_edge',
-        label: 'Ownership interest',
+        label: 'Ownership',
         critical: true,
         header: [/owner/i, /owned|entity|subsidiary/i, /interest|%|share/i],
         columns: [
           { key: 'owner', label: 'Owner', type: 'string', header: /^owner$/i, critical: true },
           { key: 'owned', label: 'Owned entity', type: 'string', header: /owned|entity|subsidiary/i, critical: true },
-          { key: 'pct', label: 'Interest', type: 'percent', header: /interest|%|share/i, critical: true },
+          { key: 'pct', label: 'Percentage held', type: 'percent', header: /interest|%|share/i, critical: true },
         ],
       },
     ],

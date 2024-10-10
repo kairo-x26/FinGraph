@@ -12,6 +12,8 @@ import type { CaseSummary, DocumentSummary, Fact, Page } from '@/lib/types';
 import { Badge, Button, EmptyState, Field, IconButton, Input, LoadingRows, Notice, Select, SourcePage, Textarea, useToast, type Highlight } from '@/ui';
 import { useCaseMutation, useDocuments, useFacts } from './hooks';
 
+const GROUP_LABELS: Record<string, string> = { beneficial_owner: 'Beneficial owner', director: 'Director or officer', ownership_edge: 'Ownership interest' };
+
 function Dropzone({ c, onUploaded }: { c: CaseSummary; onUploaded: (docId: string) => void }) {
   const toast = useToast();
   const input = useRef<HTMLInputElement>(null);
@@ -265,7 +267,7 @@ function DocumentPanel({ c, d, facts }: { c: CaseSummary; d: DocumentSummary; fa
             {grouped.groups.map(([g, items]) => (
               <li key={g}>
                 <p className="border-b border-rule bg-sheet-sunk px-3 py-1.5 text-2xs font-semibold text-ink-muted">
-                  {items[0]!.field_label.split(' ').slice(0, 2).join(' ')} {g.split(':')[1]}
+                  {GROUP_LABELS[g.split(':')[0]!] ?? 'Group'} {g.split(':')[1]}
                 </p>
                 <ul>
                   {items.map((f) => (
@@ -277,7 +279,7 @@ function DocumentPanel({ c, d, facts }: { c: CaseSummary; d: DocumentSummary; fa
           </ul>
         )}
       </div>
-      <div className="min-w-0">
+      <div className="min-w-0 xl:sticky xl:top-16 xl:self-start">
         {quarantined ? (
           <Notice tone="conflict" title="Quarantined">
             <span className="flex items-center gap-1.5">
@@ -291,7 +293,7 @@ function DocumentPanel({ c, d, facts }: { c: CaseSummary; d: DocumentSummary; fa
         ) : pages.isLoading || d.status !== 'processed' ? (
           <LoadingRows rows={10} />
         ) : (
-          <div data-scroll-panel className="flex max-h-[calc(100vh-220px)] flex-col gap-4 overflow-y-auto pr-1">
+          <div data-scroll-panel className="flex max-h-[calc(100vh-90px)] flex-col gap-4 overflow-y-auto pr-1">
             {pages.data?.pages.map((p) => (
               <SourcePage key={p.page_no} pageNo={p.page_no} text={p.text} ocr={p.ocr} highlights={highlights(p.page_no)} />
             ))}
