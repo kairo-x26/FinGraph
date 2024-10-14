@@ -79,3 +79,13 @@ describe('foundation', () => {
     expect(res.json().openapi).toBe('3.0.3');
   });
 });
+
+describe('metrics', () => {
+  it('exposes Prometheus metrics outside production', async () => {
+    await env.app.inject({ method: 'GET', url: '/healthz' });
+    const res = await env.app.inject({ method: 'GET', url: '/metrics' });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain('fingraph_http_requests_total{method="GET",route="/healthz",status="2xx"}');
+    expect(res.body).toContain('fingraph_outbox_pending 0');
+  });
+});

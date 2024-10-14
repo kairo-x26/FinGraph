@@ -25,6 +25,7 @@ import { AppError } from './lib/errors';
 import { auditRoutes } from './modules/audit/routes';
 import { caseRoutes } from './modules/cases/routes';
 import { healthRoutes } from './modules/health/routes';
+import { metricsEndpoint } from './modules/health/metrics-route';
 import { adminRoutes } from './modules/identity/admin-routes';
 import { authRoutes, identityHooks } from './modules/identity/auth-routes';
 import { scimRoutes } from './modules/identity/scim';
@@ -188,6 +189,7 @@ export async function buildApp({ config, db, services }: BuildOptions): Promise<
   registerRateLimit(app, config.RATE_LIMIT_PER_MINUTE);
   registerIdempotency(app);
 
+  await metricsEndpoint(app);
   await app.register(healthRoutes);
   await app.register(authRoutes);
   await app.register(adminRoutes);

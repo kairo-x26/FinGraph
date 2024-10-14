@@ -6,6 +6,7 @@ import { AppError } from '../../lib/errors';
 import { settingsOf, type TenantRow } from '../identity/tenants';
 import { caseGraph, type Edge } from '../graph/queries';
 import { hybridSearch, type SearchHit } from './search';
+import { metrics } from '../../lib/metrics';
 
 const INJECTION_PATTERNS = [
   /ignore (?:all |any )?(?:previous|prior|above|earlier) instructions/i,
@@ -213,6 +214,7 @@ export async function askQuestion(ctx: AppContext, auth: AuthContext, o: AskOpti
           ? 'The available evidence does not support a reliable answer.'
           : output.answer;
 
+  metrics.aiQuestions.inc({ status, provider: result?.provider ?? ctx.llm.provider });
   const row = await tx((t) =>
     t.one<{ id: string; created_at: Date }>(
       `insert into ai_interactions (tenant_id, case_id, user_id, question, status, answer, claims, citations, missing, flags,

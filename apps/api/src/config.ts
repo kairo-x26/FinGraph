@@ -66,6 +66,8 @@ const schema = z.object({
   WEBHOOK_ALLOW_PRIVATE: bool.optional(),
 
   RATE_LIMIT_PER_MINUTE: z.coerce.number().int().default(600),
+  /** Bearer token required to scrape /metrics (open outside production when unset). */
+  METRICS_TOKEN: z.string().min(16).optional(),
 
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),

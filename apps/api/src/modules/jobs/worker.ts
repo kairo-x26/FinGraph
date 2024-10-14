@@ -1,6 +1,7 @@
 import { hostname } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import type { AppContext } from '../../context';
+import { metrics } from '../../lib/metrics';
 import { classifyError } from './errors';
 import { claimJob, completeJob, extendLease, failJob, type JobRow } from './queue';
 
@@ -81,10 +82,13 @@ export class Worker {
         heartbeat: () => extendLease(this.ctx.db, job, this.id, this.opts.leaseSeconds ?? 300),
       });
       await completeJob(this.ctx.db, job, this.id, result ?? null);
+      metrics.jobs.inc({ kind: job.kind, outcome: 'succeeded' });
+      metrics.jobDuration.observe({ kind: job.kind }, (Date.now() - started) / 1000);
       log.info({ ms: Date.now() - started }, 'job succeeded');
     } catch (err) {
       const failure = classifyError(err);
       const status = await failJob(this.ctx.db, job, this.id, failure);
+      metrics.jobs.inc({ kind: job.kind, outcome: status === 'queued' ? 'retried' : status });
       log.warn({ ms: Date.now() - started, error_type: failure.type, err: failure.message, status }, 'job failed');
     }
   }
