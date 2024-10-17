@@ -47,7 +47,7 @@ const REL_TEXT: Record<string, string> = {
   OWNED_BY: 'is owned by',
   DIRECTOR_OF: 'is a director of',
   SUBSIDIARY_OF: 'is a subsidiary of',
-  OFFICER_OF: 'is an officer of',
+  OFFICER_OF: 'is the control person and an officer of',
   SIGNATORY_OF: 'is a signatory of',
 };
 
@@ -62,9 +62,9 @@ function graphPassages(edges: Edge[], names: Map<string, string>, question: stri
   const chosen = edges.filter((e) => !focus.size || focus.has(e.source_entity_id) || focus.has(e.target_entity_id) || relationshipQuestion);
   return chosen.slice(0, 20).map((e, i) => {
     const pct = e.ownership_pct !== null ? ` (${Number(e.ownership_pct)}%)` : '';
-    const role = e.role_title ? ` as ${e.role_title}` : '';
+    const role = e.role_title ? `, with the title ${e.role_title}` : '';
     const status = e.review_status === 'verified' ? 'verified by a reviewer' : `${e.review_status}, not yet verified`;
-    const text = `${names.get(e.source_entity_id)} ${REL_TEXT[e.relationship_type] ?? e.relationship_type}${role} ${names.get(e.target_entity_id)}${pct}. Source: ${e.evidence_document_title}${e.evidence_page ? `, page ${e.evidence_page}` : ''}. Status: ${status}.`;
+    const text = `${names.get(e.source_entity_id)} ${REL_TEXT[e.relationship_type] ?? e.relationship_type} ${names.get(e.target_entity_id)}${pct}${role}. Source: ${e.evidence_document_title}${e.evidence_page ? `, page ${e.evidence_page}` : ''}. Status: ${status}.`;
     return { passage: { id: `G${start + i}`, kind: 'graph' as const, title: 'Relationship graph', page: null, text }, edge: e };
   });
 }

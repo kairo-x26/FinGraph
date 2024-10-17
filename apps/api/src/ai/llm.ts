@@ -69,14 +69,23 @@ export class ExtractiveLlm implements LlmProvider {
     const scored: { text: string; id: string; score: number; kind: string }[] = [];
     for (const p of passages) {
       // graph passages are single statements with their source; keep them whole
-      for (const s of p.kind === 'graph' ? [p.text] : splitSentences(p.text)) {
+      const lines = p.kind === 'graph' ? [p.text] : splitSentences(p.text);
+      lines.forEach((line, i) => {
+        // a "Label:" line is read together with the value that follows it
+        const next = lines[i + 1];
+        const s = /:\s*$/.test(line) && next ? `${line} ${next}` : line;
         const t = new Set(terms(s));
         let hits = 0;
         for (const w of q) if (t.has(w)) hits++;
-        if (!hits) continue;
-        const score = hits / Math.max(3, q.size) + (p.kind === 'graph' ? 0.15 : 0) + Math.min(0.1, t.size / 200);
+        // multi-term questions need at least two matching terms to count as relevant
+        if (hits < Math.min(2, q.size)) return;
+        // reward statements that add something the question did not already say
+        const novel = [...t].filter((w) => !q.has(w)).length;
+        const specific = /\d/.test(s) || /\b[A-Z][a-z]+ [A-Z][a-z]+\b/.test(s.replace(/^[^:]*:/, '')) ? 0.15 : 0;
+        const echo = novel === 0 ? 0.5 : 1;
+        const score = (hits / Math.max(3, q.size) + (p.kind === 'graph' ? 0.15 : 0) + Math.min(0.1, novel / 60) + specific) * echo;
         scored.push({ text: s, id: p.id, score, kind: p.kind });
-      }
+      });
     }
     scored.sort((a, b) => b.score - a.score);
     const picked: typeof scored = [];

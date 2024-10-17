@@ -85,8 +85,9 @@ async function as(tenant: TenantRow, userId: string) {
     patch: (url: string, body: unknown) => call('PATCH', url, body),
     async upload(caseId: string, file: { filename: string; mime: string; bytes: Buffer }, extra: Record<string, unknown> = {}) {
       const init = await call('POST', '/v1/documents/uploads', { case_id: caseId, filename: file.filename, mime_type: file.mime, size_bytes: file.bytes.length });
-      const url = new URL(init.upload_url);
-      await app.inject({ method: 'PUT', url: url.pathname + url.search, headers: { 'content-type': 'application/octet-stream' }, payload: file.bytes });
+      // the signed URL is public-facing (it may include the web proxy prefix); call the API route directly
+      const local = String(init.upload_url).slice(config.PUBLIC_API_URL.length);
+      await app.inject({ method: 'PUT', url: local, headers: { 'content-type': 'application/octet-stream' }, payload: file.bytes });
       return call('POST', '/v1/documents', { upload_id: init.upload_id, ...extra });
     },
   };

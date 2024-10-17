@@ -133,15 +133,18 @@ export async function webhookRoutes(app: FastifyInstance) {
     permission: 'webhook:manage',
     scopes: ['webhooks:manage'],
     params: uuidParam,
-    handler: async ({ params, tx }) => ({
-      items: await tx((t) =>
-        t.many(
-          `select id, event_id, event_type, status, attempts, last_status_code, last_error, last_attempt_at, delivered_at, created_at
-             from webhook_deliveries where endpoint_id = $1 order by created_at desc limit 100`,
-          [params.id],
-        ),
-      ),
-    }),
+    handler: async ({ params, tx }) =>
+      tx(async (t) => {
+        const ep = await t.one('select id from webhook_endpoints where id = $1', [params.id]);
+        if (!ep) throw notFound('Webhook');
+        return {
+          items: await t.many(
+            `select id, event_id, event_type, status, attempts, last_status_code, last_error, last_attempt_at, delivered_at, created_at
+               from webhook_deliveries where endpoint_id = $1 order by created_at desc limit 100`,
+            [params.id],
+          ),
+        };
+      }),
   });
 
   route(app, {

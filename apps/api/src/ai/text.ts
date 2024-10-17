@@ -19,7 +19,7 @@ export function stem(word: string): string {
 }
 
 export function tokens(text: string): string[] {
-  return (text.toLowerCase().match(/[a-z0-9][a-z0-9%.-]*[a-z0-9%]|[a-z0-9]/g) ?? []).filter((t) => !STOPWORDS.has(t));
+  return (text.toLowerCase().match(/[a-z0-9][a-z0-9%.]*[a-z0-9%]/g) ?? []).filter((t) => t.length > 1 && !STOPWORDS.has(t));
 }
 
 export function terms(text: string): string[] {

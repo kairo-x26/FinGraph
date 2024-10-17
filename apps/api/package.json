@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "migrate": "tsx src/db/cli.ts",
-    "seed": "tsx --env-file-if-exists=.env scripts/seed.ts"
+    "seed": "tsx --env-file-if-exists=.env scripts/seed.ts",
+    "eval": "tsx --env-file-if-exists=.env scripts/eval.ts"
   },
   "devDependencies": {
     "@fingraph/fixtures": "workspace:*",
