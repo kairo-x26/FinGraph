@@ -36,6 +36,11 @@ const schema = z.object({
   OIDC_ISSUER: z.string().url().default('http://localhost:4100'),
   OIDC_CLIENT_ID: z.string().default('fingraph-web'),
   OIDC_CLIENT_SECRET: z.string().default('dev-client-secret'),
+  /**
+   * Server-side base URL for the default IdP when it differs from the issuer the
+   * browser uses (e.g. inside Docker). Discovery, token and JWKS requests go here.
+   */
+  OIDC_INTERNAL_URL: z.string().url().optional(),
 
   SESSION_IDLE_MINUTES: z.coerce.number().int().default(30),
   SESSION_ABSOLUTE_HOURS: z.coerce.number().int().default(12),
@@ -72,6 +77,8 @@ const schema = z.object({
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   SANDBOX_URL: z.string().url().default('http://localhost:4100'),
+  /** Browser-facing sandbox URL for the consent page, when SANDBOX_URL is internal. */
+  SANDBOX_PUBLIC_URL: z.string().url().optional(),
   /** Enable the sandbox document repository connector (on by default outside production). */
   SANDBOX_CONNECTOR: bool.optional(),
   SANDBOX_CONNECTOR_CLIENT_ID: z.string().default('fingraph-connector'),

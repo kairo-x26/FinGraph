@@ -128,8 +128,10 @@ export class SandboxDriveProvider extends OAuthProvider implements ConnectorProv
     clientId: string,
     clientSecret: string,
     fetchImpl?: typeof fetch,
+    publicBase: string = base,
   ) {
-    super({ authorize: `${base}/authorize`, token: `${base}/token`, revoke: `${base}/revoke` }, clientId, clientSecret, fetchImpl);
+    // the consent page is opened by the browser; token and file calls go server to server
+    super({ authorize: `${publicBase}/authorize`, token: `${base}/token`, revoke: `${base}/revoke` }, clientId, clientSecret, fetchImpl);
   }
 
   async accountLabel() {
@@ -209,7 +211,10 @@ export class GoogleDriveProvider extends OAuthProvider implements ConnectorProvi
 export function connectorProviders(config: Config): Map<string, ConnectorProvider> {
   const out = new Map<string, ConnectorProvider>();
   if (config.SANDBOX_CONNECTOR ?? config.NODE_ENV !== 'production') {
-    out.set('sandbox_drive', new SandboxDriveProvider(config.SANDBOX_URL, config.SANDBOX_CONNECTOR_CLIENT_ID, config.SANDBOX_CONNECTOR_CLIENT_SECRET));
+    out.set(
+      'sandbox_drive',
+      new SandboxDriveProvider(config.SANDBOX_URL, config.SANDBOX_CONNECTOR_CLIENT_ID, config.SANDBOX_CONNECTOR_CLIENT_SECRET, undefined, config.SANDBOX_PUBLIC_URL ?? config.SANDBOX_URL),
+    );
   }
   if (config.GOOGLE_CLIENT_ID && config.GOOGLE_CLIENT_SECRET) {
     out.set('google_drive', new GoogleDriveProvider(config.GOOGLE_CLIENT_ID, config.GOOGLE_CLIENT_SECRET));

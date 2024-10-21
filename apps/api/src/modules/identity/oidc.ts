@@ -52,12 +52,21 @@ export class OidcClient {
   private discovery = new Map<string, { doc: Discovery; at: number }>();
   private jwks = new Map<string, ReturnType<typeof createRemoteJWKSet>>();
 
-  constructor(private readonly fetchImpl: typeof fetch = fetch) {}
+  constructor(
+    private readonly fetchImpl: typeof fetch = fetch,
+    /** Maps the public issuer prefix to an internal one for server-side requests. */
+    private readonly rewrite?: { from: string; to: string },
+  ) {}
+
+  private internal(url: string) {
+    const r = this.rewrite;
+    return r && url.startsWith(r.from) ? r.to + url.slice(r.from.length) : url;
+  }
 
   async discover(issuer: string): Promise<Discovery> {
     const cached = this.discovery.get(issuer);
     if (cached && Date.now() - cached.at < DISCOVERY_TTL_MS) return cached.doc;
-    const url = `${issuer.replace(/\/$/, '')}/.well-known/openid-configuration`;
+    const url = this.internal(`${issuer.replace(/\/$/, '')}/.well-known/openid-configuration`);
     const res = await this.fetchImpl(url, { signal: AbortSignal.timeout(5000) });
     if (!res.ok) throw new OidcError('idp_unavailable', `discovery failed with ${res.status}`);
     const doc = (await res.json()) as Discovery;
@@ -99,7 +108,7 @@ export class OidcClient {
       throw new OidcError('invalid_issuer', 'authorization response is missing iss');
     }
 
-    const res = await this.fetchImpl(d.token_endpoint, {
+    const res = await this.fetchImpl(this.internal(d.token_endpoint), {
       method: 'POST',
       headers: {
         'content-type': 'application/x-www-form-urlencoded',
@@ -124,7 +133,7 @@ export class OidcClient {
 
     let jwks = this.jwks.get(d.jwks_uri);
     if (!jwks) {
-      jwks = createRemoteJWKSet(new URL(d.jwks_uri));
+      jwks = createRemoteJWKSet(new URL(this.internal(d.jwks_uri)));
       this.jwks.set(d.jwks_uri, jwks);
     }
     let payload: IdTokenClaims;

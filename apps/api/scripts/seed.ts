@@ -7,7 +7,6 @@
  *   pnpm --filter @fingraph/api seed -- --reset # drop the demo tenants first
  */
 import { extraFixtures, globexIncorporation, northwindFixtures } from '@fingraph/fixtures';
-import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../src/app';
 import { loadConfig } from '../src/config';
 import { createDatabase } from '../src/db';

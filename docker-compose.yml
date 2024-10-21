@@ -1,0 +1,91 @@
+# Full local stack with real Postgres.
+#   docker compose up --build
+#   docker compose run --rm api node dist/db/cli.js    # migrations also run on API start
+#   docker compose --profile demo run --rm seed        # demo organizations
+# Then open http://localhost:3000 (organization "acme", password "password", code 246810).
+x-api-env: &api-env
+  NODE_ENV: production
+  DATABASE_URL: postgres://fingraph:fingraph@postgres:5432/fingraph
+  APP_SECRET: ${APP_SECRET:-compose-demo-secret-change-me-0123456789abcdef}
+  PUBLIC_API_URL: http://localhost:3000/api
+  WEB_URL: http://localhost:3000
+  OIDC_ISSUER: http://localhost:4100
+  OIDC_INTERNAL_URL: http://sandbox:4100
+  SANDBOX_URL: http://sandbox:4100
+  SANDBOX_PUBLIC_URL: http://localhost:4100
+  SANDBOX_CONNECTOR: 'true'
+  STORAGE_DRIVER: local
+  STORAGE_LOCAL_DIR: /app/.data/objects
+  MALWARE_SCANNER: ${MALWARE_SCANNER:-builtin}
+  CLAMAV_HOST: clamav
+  LLM_PROVIDER: ${LLM_PROVIDER:-local}
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+  COOKIE_SECURE: 'false'
+  WEBHOOK_ALLOW_PRIVATE: 'true'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: fingraph
+      POSTGRES_PASSWORD: fingraph
+      POSTGRES_DB: fingraph
+    volumes: [pgdata:/var/lib/postgresql/data]
+    ports: ['5432:5432']
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U fingraph']
+      interval: 5s
+      retries: 20
+
+  sandbox:
+    build: { context: ., dockerfile: apps/sandbox/Dockerfile }
+    environment:
+      SANDBOX_ISSUER: http://localhost:4100
+      SANDBOX_CALLBACK_BASE: http://localhost:3000/api
+    ports: ['4100:4100']
+
+  api:
+    build: { context: ., dockerfile: apps/api/Dockerfile }
+    environment:
+      <<: *api-env
+      WORKER_INLINE: 'false'
+    volumes: [objects:/app/.data]
+    depends_on:
+      postgres: { condition: service_healthy }
+    ports: ['4000:4000']
+
+  worker:
+    build: { context: ., dockerfile: apps/api/Dockerfile }
+    command: ['node', 'dist/worker.js']
+    environment:
+      <<: *api-env
+    volumes: [objects:/app/.data]
+    depends_on:
+      api: { condition: service_healthy }
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args: { API_INTERNAL_URL: 'http://api:4000' }
+    ports: ['3000:3000']
+    depends_on: [api]
+
+  seed:
+    profiles: [demo]
+    build: { context: ., dockerfile: apps/api/Dockerfile }
+    command: ['node', 'dist/seed.js']
+    environment:
+      <<: *api-env
+    volumes: [objects:/app/.data]
+    depends_on:
+      api: { condition: service_healthy }
+
+  clamav:
+    profiles: [clamav]
+    image: clamav/clamav:stable
+    ports: ['3310:3310']
+
+volumes:
+  pgdata:
+  objects:

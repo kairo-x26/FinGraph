@@ -55,7 +55,7 @@ export async function identityHooks(app: FastifyInstance) {
 
 export async function authRoutes(app: FastifyInstance) {
   const { config, db } = app.ctx;
-  const oidc = new OidcClient();
+  const oidc = new OidcClient(fetch, config.OIDC_INTERNAL_URL ? { from: config.OIDC_ISSUER, to: config.OIDC_INTERNAL_URL } : undefined);
   const callbackUrl = `${config.PUBLIC_API_URL}/v1/auth/callback`;
 
   const failLogin = (reply: FastifyReply, code: string) =>
