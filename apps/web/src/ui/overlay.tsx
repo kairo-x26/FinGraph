@@ -85,7 +85,7 @@ export function Drawer({ open, onClose, title, children, width = 'w-[min(720px,1
             <X className="size-4" />
           </IconButton>
         </header>
-        <div data-scroll-panel className="min-h-0 flex-1 overflow-y-auto">
+        <div data-scroll-panel tabIndex={0} className="min-h-0 flex-1 overflow-y-auto">
           {children}
         </div>
       </aside>

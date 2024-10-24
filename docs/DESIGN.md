@@ -25,8 +25,8 @@ document.
 | `rule` | `#D3DAD6` | `#2A3B45` | Dividers, table rules, input borders |
 | `register` | `#0B5D6B` | `#5EB7C6` | Actions, links, focus, selection |
 | `marker` | `#F3DC55` | `#8A7A1F` | Evidence highlight behind cited text |
-| `verified` | `#2E7D4F` | `#62C08A` | Verified / approved / clean |
-| `candidate` | `#9A6100` | `#E3A94A` | Proposed, waiting for a human |
+| `verified` | `#256B43` | `#62C08A` | Verified / approved / clean |
+| `candidate` | `#875500` | `#E3A94A` | Proposed, waiting for a human |
 | `conflict` | `#B3261E` | `#F08A80` | Conflicts, rejections, malware |
 
 The accent (`register`, a deep registry teal) is used for interaction only.

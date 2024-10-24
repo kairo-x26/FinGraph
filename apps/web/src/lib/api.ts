@@ -88,8 +88,8 @@ export async function uploadFile(
   const init = await api<{ upload_id: string; upload_url: string }>('/v1/documents/uploads', {
     body: { case_id: caseId, filename: file.name, mime_type: mime, size_bytes: file.size },
   });
-  const target = new URL(init.upload_url);
-  const put = await fetch(`/api${target.pathname}${target.search}`, {
+  // the signed URL is complete and public-facing; use it exactly as issued
+  const put = await fetch(init.upload_url, {
     method: 'PUT',
     headers: { 'content-type': 'application/octet-stream', ...(csrfToken() ? { 'x-csrf-token': csrfToken()! } : {}) },
     body: file,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { DOCUMENT_CATEGORIES, DOCUMENT_CATEGORY_LABELS } from '@fingraph/shared';
 import { Check, Lock, RotateCw, ShieldAlert, Upload, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, type DragEvent, type FormEvent } from 'react';
@@ -293,7 +293,7 @@ function DocumentPanel({ c, d, facts }: { c: CaseSummary; d: DocumentSummary; fa
         ) : pages.isLoading || d.status !== 'processed' ? (
           <LoadingRows rows={10} />
         ) : (
-          <div data-scroll-panel className="flex max-h-[calc(100vh-90px)] flex-col gap-4 overflow-y-auto pr-1">
+          <div data-scroll-panel tabIndex={0} role="region" aria-label="Document pages" className="flex max-h-[calc(100vh-90px)] flex-col gap-4 overflow-y-auto pr-1">
             {pages.data?.pages.map((p) => (
               <SourcePage key={p.page_no} pageNo={p.page_no} text={p.text} ocr={p.ocr} highlights={highlights(p.page_no)} />
             ))}
@@ -312,6 +312,12 @@ export function Evidence({ c, initialDocument }: { c: CaseSummary; initialDocume
   useEffect(() => {
     if (!selected && docs.data?.length) setSelected(docs.data[0]!.id);
   }, [docs.data, selected]);
+  // refresh facts, checklist and findings whenever another document finishes processing
+  const processed = docs.data?.filter((d) => d.latest_status === 'processed').length ?? 0;
+  const qc = useQueryClient();
+  useEffect(() => {
+    if (processed > 0) qc.invalidateQueries({ queryKey: ['case', c.id] });
+  }, [processed, c.id, qc]);
   const factsByDoc = useMemo(() => {
     const m = new Map<string, Fact[]>();
     for (const f of facts.data?.items ?? []) m.set(f.document_id, [...(m.get(f.document_id) ?? []), f]);
