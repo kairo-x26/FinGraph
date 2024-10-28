@@ -7,12 +7,12 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev": "pnpm -r --parallel --filter ./apps/** dev",
-    "build": "pnpm -r build",
-    "typecheck": "pnpm -r typecheck",
+    "dev": "pnpm -r --parallel --filter './apps/*' run dev",
+    "build": "pnpm -r run build",
+    "typecheck": "pnpm -r run typecheck",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test": "pnpm -r test",
+    "test": "pnpm -r run test",
     "e2e": "playwright test"
   },
   "devDependencies": {
