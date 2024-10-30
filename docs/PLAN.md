@@ -101,3 +101,19 @@ the spec (IAM-01, DOC-02, ...).
 2. Unit and integration tests pass on PGlite.
 3. New endpoints are in the OpenAPI document and enforce tenant + object authorization.
 4. New state-changing actions write audit events.
+
+## Status
+
+All stages are complete. Verification at the end of the build:
+
+| Check | Result |
+|---|---|
+| Unit and API integration tests | 187 passing (183 API, 4 shared) |
+| Cross-tenant authorization sweep | every route with a path parameter, no leaks |
+| AI evaluation | all section 11 targets met on the fixture set (see EVALUATION.md) |
+| End-to-end (Playwright) | WF-01, WF-03, WF-04, WF-05, tenant isolation, accessibility (WCAG 2.2 AA serious/critical): 7 passing |
+| Production driver | migrations and full seed through `pg` against a Postgres wire-protocol server |
+
+Follow-ups worth scheduling: rasterize text-less PDF pages for OCR, a shared rate-limit
+store for multi-instance deployments, automated `APP_SECRET` re-encryption, and
+verifying the container images in CI.
